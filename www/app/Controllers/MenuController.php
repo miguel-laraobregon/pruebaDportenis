@@ -4,8 +4,12 @@ namespace App\Controllers;
 
 use App\Interfaces\CrudController;
 use App\Models\Menu;
+use App\Traits\ViewTrait;
 
-class MenuController implements CrudController {
+class MenuController implements CrudController 
+{
+    use ViewTrait;
+    
     public function __construct(private readonly Menu $menuModel = new Menu()) {}
 
     /**
@@ -16,7 +20,7 @@ class MenuController implements CrudController {
     public function index(): void {
         $menus = $this->menuModel->getAll();
         $menuNavBar = $this->getMenusNavbar($menus);
-        require __DIR__ . '/../Views/menu/index.php';
+        $this->view('menu/index', compact('menus', 'menuNavBar'));
     }
 
     /**
@@ -26,7 +30,7 @@ class MenuController implements CrudController {
      */
     public function create(): void {
         $menus = $this->menuModel->getAllParents();
-        require __DIR__ . '/../Views/menu/create.php';
+        $this->view('menu/create', compact('menus'));
     }
 
     /**
@@ -40,7 +44,7 @@ class MenuController implements CrudController {
         $parentId = $data['parent_id'] ? (int)$data['parent_id'] : null;
 
         $this->menuModel->create($name, $description, $parentId);
-        header('Location: /menus');
+        $this->redirect('/menus');
     }
 
     /**
@@ -53,7 +57,7 @@ class MenuController implements CrudController {
     public function edit(int $id): void {
         $menu = $this->menuModel->findById($id);
         $menus = $this->menuModel->getAllParents();
-        require __DIR__ . '/../Views/menu/edit.php';
+        $this->view('menu/edit', compact('menu', 'menus'));
     }
 
     /**
@@ -70,7 +74,7 @@ class MenuController implements CrudController {
         $parentId = $data['parent_id'] ? (int)$data['parent_id'] : null;
 
         $this->menuModel->update($id, $name, $description, $parentId);
-        header('Location: /menus');
+        $this->redirect('/menus');
     }
 
     /**
@@ -82,7 +86,7 @@ class MenuController implements CrudController {
      */
     public function destroy(int $id): void {
         $this->menuModel->delete($id);
-        header('Location: /menus');
+        $this->redirect('/menus');
     }
 
     /**
@@ -100,8 +104,7 @@ class MenuController implements CrudController {
         if ($menu) {
             $menus = $this->menuModel->getAll();
             $menuNavBar = $this->getMenusNavbar($menus);
-            $content = $menu['description'];
-            require __DIR__ . '/../Views/menu/show.php';
+            $this->view('menu/show', compact('menu', 'menuNavBar'));
         } else {
             http_response_code(404);
             echo "Menu not found";
