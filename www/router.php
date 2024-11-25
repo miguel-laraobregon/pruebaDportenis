@@ -23,7 +23,7 @@ elseif ($method === 'GET' && $path === '/menus/create') {
 }
 // Ruta para guardar un nuevo menú
 elseif ($method === 'POST' && $path === '/menus') {
-    $controller->store();
+    $controller->store($_POST);
 }
 // Ruta para editar un menú por id
 elseif ($method === 'GET' && preg_match('#^/menus/(\d+)/edit$#', $path, $matches)) {

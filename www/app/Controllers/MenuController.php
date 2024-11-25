@@ -2,9 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Interfaces\CrudController;
 use App\Models\Menu;
 
-class MenuController {
+class MenuController implements CrudController {
     public function __construct(private readonly Menu $menuModel = new Menu()) {}
 
     /**
@@ -33,10 +34,10 @@ class MenuController {
      *
      * @return void
      */
-    public function store(): void {
-        $name = $_POST['name'];
-        $description = $_POST['description'];
-        $parentId = $_POST['parent_id'] ? (int)$_POST['parent_id'] : null;
+    public function store(array $data): void {
+        $name = $data['name'];
+        $description = $data['description'];
+        $parentId = $data['parent_id'] ? (int)$data['parent_id'] : null;
 
         $this->menuModel->create($name, $description, $parentId);
         header('Location: /menus');
