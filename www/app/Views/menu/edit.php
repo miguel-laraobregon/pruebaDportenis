@@ -14,7 +14,7 @@ ob_start();
             <label for="parent_id">Menú padre</label>
             <select class="form-control" id="parent_id"  name="parent_id">
                 <option value="">Seleccione una opción</option>
-                <?php foreach ($menus as $m): ?>
+                <?php foreach ($menus as $m) : ?>
                     <option value="<?= $m['id'] ?>" <?= $menu['parent_id'] === $m['id'] ? 'selected' : '' ?>>
                         <?= $m['name'] ?>
                     </option>

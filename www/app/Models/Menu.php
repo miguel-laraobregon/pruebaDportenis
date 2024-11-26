@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-class Menu extends Model {
-
+class Menu extends Model
+{
     protected string $table = 'menus';
 
     protected array $fillable = [
@@ -23,7 +23,7 @@ class Menu extends Model {
      *
      * @return array
      */
-    public function getAll(): array 
+    public function getAll(): array
     {
         $sql = "SELECT m1.id, 
                     m1.name, 
@@ -64,5 +64,4 @@ class Menu extends Model {
         $sql = "SELECT * FROM menus WHERE parent_id = {$this->id} ";
         return $this->fetchAllQuery($sql);
     }
-
 }

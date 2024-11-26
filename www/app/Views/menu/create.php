@@ -1,5 +1,3 @@
-
-
 <?php
 $title = 'Formulario de creación';
 ob_start();
@@ -14,7 +12,7 @@ ob_start();
             <label for="parent_id">Menú padre</label>
             <select class="form-control" id="parent_id"  name="parent_id">
                 <option value="">Seleccione una opción</option>
-                <?php foreach ($menus as $menu): ?>
+                <?php foreach ($menus as $menu) : ?>
                     <option value="<?= $menu['id'] ?>" <?= (isset($data['parent_id']) && $data['parent_id'] == $menu['id']) ? 'selected' : '' ?> >
                         <?= $menu['name'] ?>
                     </option>

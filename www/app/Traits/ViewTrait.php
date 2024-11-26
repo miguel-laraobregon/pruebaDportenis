@@ -4,13 +4,12 @@ namespace App\Traits;
 
 trait ViewTrait
 {
-    
     /**
      * Renderiza una vista.
      *
      * @param string $view Path de la vista.
      * @param array $data Datos a pasar a la vista.
-     * 
+     *
      * @return void
      */
     public function view(string $view, array $data = []): void
@@ -34,7 +33,7 @@ trait ViewTrait
      *
      * @return void
      */
-    public function redirect(string $url): void 
+    public function redirect(string $url): void
     {
         header("Location: $url");
         exit;
@@ -49,8 +48,13 @@ trait ViewTrait
      *
      * @return void
      */
-    public function handleErrorView(\Throwable $e, string $view = 'errors/404', array $data = []){
-        error_log("[ERROR] {$e->getMessage()} in {$e->getFile()} on line {$e->getLine()}\n", 3, __DIR__ . '/../../php_errors.log');
+    public function handleErrorView(\Throwable $e, string $view = 'errors/404', array $data = [])
+    {
+        error_log(
+            "[" . date('Y-m-d H:i:s') . "] [ERROR] {$e->getMessage()} in {$e->getFile()} on line {$e->getLine()}\n",
+            3,
+            __DIR__ . '/../../php_errors.log'
+        );
         $data = array_merge($data, ['error' => $e->getMessage()]);
         http_response_code(404);
         $this->view($view, $data);

@@ -7,12 +7,12 @@ use App\Models\Menu;
 use App\Traits\ViewTrait;
 use Exception;
 
-class MenuController implements CrudController 
+class MenuController implements CrudController
 {
     use ViewTrait;
 
     private Menu $menu;
-    
+
     public function __construct()
     {
         $this->menu = new Menu();
@@ -77,7 +77,7 @@ class MenuController implements CrudController
     {
         try {
             $menu = $this->menu->findById($id);
-            if(!$menu){
+            if (!$menu) {
                 throw new Exception("Menú no encontrado");
             }
             $menus = $this->menu->getAllParents();
@@ -107,7 +107,7 @@ class MenuController implements CrudController
             $menu->navLink = strtolower(str_replace(' ', '-', $data['name']));
             $menu->parent_id = $data['parent_id'] ? (int)$data['parent_id'] : null;
 
-            if($menu->parent_id === $menu->id) {
+            if ($menu->parent_id === $menu->id) {
                 throw new Exception("No es posible guardar como menú padre al mismo menú");
             }
 
@@ -134,11 +134,11 @@ class MenuController implements CrudController
         try {
             $menu = new Menu();
             $menu->id = $id;
-    
-            if(!empty($menu->getSubsByParent())) {
+
+            if (!empty($menu->getSubsByParent())) {
                 throw new Exception("No es posible eliminar un menú con submenús");
             }
-    
+
             $menu->deleteById();
             $this->redirect('/menus');
         } catch (\Throwable $e) {
@@ -163,18 +163,16 @@ class MenuController implements CrudController
         try {
             // Buscar el menú por su link
             $menu = $this->menu->findByField('navLink', $link);
-            if(!$menu){
+            if (!$menu) {
                 throw new Exception("Menú no encontrado");
             }
-            
+
             $menus = $this->menu->getAll();
             $menuNavBar = $this->getMenusNavbar($menus);
             $this->view('menu/show', compact('menu', 'menuNavBar'));
-
         } catch (\Throwable $e) {
             $this->handleErrorView($e);
         }
-        
     }
 
     /**
@@ -183,12 +181,14 @@ class MenuController implements CrudController
      * @param array $menus
      *
      */
-    public function getMenusNavBar(array $menus = []): array 
+    public function getMenusNavBar(array $menus = []): array
     {
-        if(empty($menus)) return [];
+        if (empty($menus)) {
+            return [];
+        }
 
-        $menuNavBar_aux = array_map(function($m){
-            $menu = (Object) [
+        $menuNavBar_aux = array_map(function ($m) {
+            $menu = (object) [
                 'id' => $m['id'],
                 'name' => $m['name'],
                 'navLink' => $m['navLink'],
@@ -198,15 +198,11 @@ class MenuController implements CrudController
         }, $menus);
 
         // Obtenemos solo los parents
-        $menuNavBar = array_filter($menuNavBar_aux, function($m){
-            return empty($m->parent_id);
-        });
+        $menuNavBar = array_filter($menuNavBar_aux, fn($m) => empty($m->parent_id));
 
         // Obtenemos los submenus
-        foreach($menuNavBar as $k => $v){
-            $submenu = array_filter($menuNavBar_aux, function($m) use($v){
-                return $m->parent_id == $v->id;
-            });
+        foreach ($menuNavBar as $v) {
+            $submenu = array_filter($menuNavBar_aux, fn($m) => $m->parent_id == $v->id);
             $v->submenu = $submenu ?? [];
         }
 
@@ -214,13 +210,14 @@ class MenuController implements CrudController
     }
 
     /**
-     * Función que valida que se reciba nombre y descripción 
+     * Función que valida que se reciba nombre y descripción
      *
      * @param array $data
      *
      * @return void
      */
-    private function validateMenuData(array $data): array {
+    private function validateMenuData(array $data): array
+    {
         if (empty(trim($data['name'])) || empty(trim($data['description']))) {
             throw new Exception("El nombre y la descripción son obligatorios.");
         }

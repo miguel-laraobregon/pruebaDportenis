@@ -20,22 +20,21 @@
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav">
 
-                    <?php if(isset($menuNavBar) && !empty($menuNavBar)): ?>
-                        <?php foreach($menuNavBar as $menu): ?>
-                            <?php if(empty($menu->submenu)): ?>
+                    <?php if (isset($menuNavBar) && !empty($menuNavBar)) : ?>
+                        <?php foreach ($menuNavBar as $menu) : ?>
+                            <?php if (empty($menu->submenu)) : ?>
                                 <li class="nav-item ">
                                     <a class="nav-link" href="/<?= $menu->navLink ?>">
                                         <?= htmlspecialchars($menu->name) ?>
                                     </a>
                                 </li>
-                            <?php else: ?>
-
+                            <?php else : ?>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
                                         <?= htmlspecialchars($menu->name) ?>
                                     </a>
                                     <div class="dropdown-menu">
-                                        <?php foreach($menu->submenu as $submenu): ?>
+                                        <?php foreach ($menu->submenu as $submenu) : ?>
                                             <a class="dropdown-item" href="/<?= $submenu->navLink ?>">
                                                 <?= htmlspecialchars($submenu->name) ?>
                                             </a>
@@ -50,7 +49,7 @@
         </nav>
     </header>
 
-    <?php if (isset($error)): ?>
+    <?php if (isset($error)) : ?>
         <div class="alert alert-danger">
             <?= htmlspecialchars($error) ?>
         </div>

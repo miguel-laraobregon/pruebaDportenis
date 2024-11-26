@@ -1,5 +1,5 @@
-<?php 
-$title = "Error"; 
+<?php
+$title = "Error";
 ob_start();
 ?>
 

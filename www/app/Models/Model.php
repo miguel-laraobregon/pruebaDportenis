@@ -23,14 +23,14 @@ abstract class Model
      *
      * @param string $field Campo por el que se desea realizar la búsqueda
      * @param mixed $value Valor a buscar
-     * 
+     *
      * @return array|null El resultado de la consulta o null si no se encuentra
      */
     public function findByField(string $field, $value): ?array
     {
 
         // Validamos que el campo esté en los campos permitidos
-        if (!in_array($field, array_merge($this->fillable,['id']))) {
+        if (!in_array($field, array_merge($this->fillable, ['id']))) {
             throw new InvalidArgumentException("Campo '{$field}' no permitido.");
         }
 
@@ -62,7 +62,7 @@ abstract class Model
      *
      * @return array
      */
-    public function fetchAllQuery(string $sql): array 
+    public function fetchAllQuery(string $sql): array
     {
         $query = $this->db->query($sql);
         return $query->fetchAll(PDO::FETCH_ASSOC);
@@ -166,6 +166,4 @@ abstract class Model
 
         return $attributes;
     }
-
-    
 }

@@ -4,5 +4,8 @@
         "App\\": "app/",
         "Config\\": "config/"
       }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.11"
     }
-  }
+}

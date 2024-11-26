@@ -21,7 +21,7 @@ ob_start();
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($menus as $menu): ?>
+            <?php foreach ($menus as $menu) : ?>
                 <tr>
                     <td><?= $menu['id'] ?></td>
                     <td><?= htmlspecialchars($menu['name']) ?></td>

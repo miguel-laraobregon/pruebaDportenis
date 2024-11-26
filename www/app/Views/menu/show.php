@@ -1,5 +1,5 @@
-<?php 
-$title = htmlspecialchars($menu['name']); 
+<?php
+$title = htmlspecialchars($menu['name']);
 ob_start();
 ?>
 
