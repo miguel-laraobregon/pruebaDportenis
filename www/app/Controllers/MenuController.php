@@ -9,16 +9,22 @@ use App\Traits\ViewTrait;
 class MenuController implements CrudController 
 {
     use ViewTrait;
+
+    private Menu $menu;
     
-    public function __construct(private readonly Menu $menuModel = new Menu()) {}
+    public function __construct()
+    {
+        $this->menu = new Menu();
+    }
 
     /**
      * index - funcion que consulta todos los menus para mostrarlos en vista principañ
      *
      * @return void
      */
-    public function index(): void {
-        $menus = $this->menuModel->getAll();
+    public function index(): void
+    {
+        $menus = $this->menu->getAll();
         $menuNavBar = $this->getMenusNavbar($menus);
         $this->view('menu/index', compact('menus', 'menuNavBar'));
     }
@@ -28,8 +34,9 @@ class MenuController implements CrudController
      *
      * @return void
      */
-    public function create(): void {
-        $menus = $this->menuModel->getAllParents();
+    public function create(): void
+    {
+        $menus = $this->menu->getAllParents();
         $this->view('menu/create', compact('menus'));
     }
 
@@ -38,12 +45,14 @@ class MenuController implements CrudController
      *
      * @return void
      */
-    public function store(array $data): void {
-        $name = $data['name'];
-        $description = $data['description'];
-        $parentId = $data['parent_id'] ? (int)$data['parent_id'] : null;
-
-        $this->menuModel->create($name, $description, $parentId);
+    public function store(array $data): void
+    {
+        $menu = new Menu();
+        $menu->name = $data['name'];
+        $menu->description = $data['description'];
+        $menu->navLink = strtolower(str_replace(' ', '-', $data['name']));
+        $menu->parent_id = $data['parent_id'] ? (int)$data['parent_id'] : null;
+        $menu->save();
         $this->redirect('/menus');
     }
 
@@ -54,9 +63,10 @@ class MenuController implements CrudController
      *
      * @return void
      */
-    public function edit(int $id): void {
-        $menu = $this->menuModel->findById($id);
-        $menus = $this->menuModel->getAllParents();
+    public function edit(int $id): void
+    {
+        $menu = $this->menu->findById($id);
+        $menus = $this->menu->getAllParents();
         $this->view('menu/edit', compact('menu', 'menus'));
     }
 
@@ -68,12 +78,15 @@ class MenuController implements CrudController
      *
      * @return void
      */
-    public function update(int $id, array $data): void {
-        $name = $data['name'];
-        $description = $data['description'];
-        $parentId = $data['parent_id'] ? (int)$data['parent_id'] : null;
-
-        $this->menuModel->update($id, $name, $description, $parentId);
+    public function update(int $id, array $data): void
+    {
+        $menu = new Menu();
+        $menu->id = $id;
+        $menu->name = $data['name'];
+        $menu->description = $data['description'];
+        $menu->navLink = strtolower(str_replace(' ', '-', $data['name']));
+        $menu->parent_id = $data['parent_id'] ? (int)$data['parent_id'] : null;
+        $menu->save();
         $this->redirect('/menus');
     }
 
@@ -84,8 +97,9 @@ class MenuController implements CrudController
      *
      * @return void
      */
-    public function destroy(int $id): void {
-        $this->menuModel->delete($id);
+    public function destroy(int $id): void
+    {
+        $this->menu->deleteById($id);
         $this->redirect('/menus');
     }
 
@@ -96,19 +110,19 @@ class MenuController implements CrudController
      *
      * @return void
      */
-    public function showByName($link)
+    public function showByName(string $link): void
     {
         // Buscar el menú por su link
-        $menu = $this->menuModel->findByLink($link); 
+        $menu = $this->menu->findByField('navLink', $link);
 
-        if ($menu) {
-            $menus = $this->menuModel->getAll();
-            $menuNavBar = $this->getMenusNavbar($menus);
-            $this->view('menu/show', compact('menu', 'menuNavBar'));
-        } else {
+        if(!$menu){
             http_response_code(404);
             echo "Menu not found";
         }
+        
+        $menus = $this->menu->getAll();
+        $menuNavBar = $this->getMenusNavbar($menus);
+        $this->view('menu/show', compact('menu', 'menuNavBar'));
     }
 
     /**
@@ -117,7 +131,8 @@ class MenuController implements CrudController
      * @param array $menus
      *
      */
-    public function getMenusNavBar($menus = []){
+    public function getMenusNavBar(array $menus = []): array 
+    {
         if(empty($menus)) return false;
 
         $menuNavBar_aux = array_map(function($m){

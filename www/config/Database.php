@@ -14,9 +14,8 @@ class Database {
     private string $username = 'root';
     private string $password = 'test';
 
-    public function __construct(
-        
-    ) {
+    public function __construct()
+    {
         try {
             $this->connection = new PDO( "mysql:host={$this->host};port={$this->port};dbname={$this->dbName};charset=utf8mb4", $this->username, $this->password );
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
