@@ -85,10 +85,14 @@ abstract class Model
      * @param int $id
      * @return bool
      */
-    public function deleteById(int $id): bool
+    public function deleteById(): bool
     {
         $query = $this->db->prepare("DELETE FROM {$this->table} WHERE id = :id");
-        return $query->execute(['id' => $id]);
+        $result = $query->execute(['id' => $this->id]);
+        if (!$result) {
+            throw new \Exception("Ocurrió un error en la eliminación del registro ");
+        }
+        return $result;
     }
 
     /**
@@ -117,9 +121,10 @@ abstract class Model
 
         $result = $query->execute($values);
 
-        if ($result) {
-            $this->id = (int)$this->db->lastInsertId();
+        if (!$result) {
+            throw new \Exception("Ocurrió un error en la creación del registro ");
         }
+        $this->id = (int)$this->db->lastInsertId();
 
         return $result;
     }
@@ -138,7 +143,11 @@ abstract class Model
         $values = $this->setAttributes();
         $values['id'] = $this->id;
 
-        return $query->execute($values);
+        $result = $query->execute($values);
+        if (!$result) {
+            throw new \Exception("Ocurrió un error en la actualización del registro ");
+        }
+        return $result;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Interfaces\CrudController;
 use App\Models\Menu;
 use App\Traits\ViewTrait;
+use Exception;
 
 class MenuController implements CrudController 
 {
@@ -47,13 +48,22 @@ class MenuController implements CrudController
      */
     public function store(array $data): void
     {
-        $menu = new Menu();
-        $menu->name = $data['name'];
-        $menu->description = $data['description'];
-        $menu->navLink = strtolower(str_replace(' ', '-', $data['name']));
-        $menu->parent_id = $data['parent_id'] ? (int)$data['parent_id'] : null;
-        $menu->save();
-        $this->redirect('/menus');
+        try {
+            $data = $this->validateMenuData($data);
+
+            $menu = new Menu();
+            $menu->name = $data['name'];
+            $menu->description = $data['description'];
+            $menu->navLink = strtolower(str_replace(' ', '-', $data['name']));
+            $menu->parent_id = $data['parent_id'] ? (int)$data['parent_id'] : null;
+            $menu->save();
+            $this->redirect('/menus');
+        } catch (\Throwable $e) {
+            $this->handleErrorView($e, 'menu/create', [
+                'menus' => $this->menu->getAllParents(),
+                'data' =>  $data
+            ]);
+        }
     }
 
     /**
@@ -65,9 +75,16 @@ class MenuController implements CrudController
      */
     public function edit(int $id): void
     {
-        $menu = $this->menu->findById($id);
-        $menus = $this->menu->getAllParents();
-        $this->view('menu/edit', compact('menu', 'menus'));
+        try {
+            $menu = $this->menu->findById($id);
+            if(!$menu){
+                throw new Exception("Menú no encontrado");
+            }
+            $menus = $this->menu->getAllParents();
+            $this->view('menu/edit', compact('menu', 'menus'));
+        } catch (\Throwable $e) {
+            $this->handleErrorView($e);
+        }
     }
 
     /**
@@ -80,14 +97,29 @@ class MenuController implements CrudController
      */
     public function update(int $id, array $data): void
     {
-        $menu = new Menu();
-        $menu->id = $id;
-        $menu->name = $data['name'];
-        $menu->description = $data['description'];
-        $menu->navLink = strtolower(str_replace(' ', '-', $data['name']));
-        $menu->parent_id = $data['parent_id'] ? (int)$data['parent_id'] : null;
-        $menu->save();
-        $this->redirect('/menus');
+        try {
+            $data = $this->validateMenuData($data);
+
+            $menu = new Menu();
+            $menu->id = $id;
+            $menu->name = $data['name'];
+            $menu->description = $data['description'];
+            $menu->navLink = strtolower(str_replace(' ', '-', $data['name']));
+            $menu->parent_id = $data['parent_id'] ? (int)$data['parent_id'] : null;
+
+            if($menu->parent_id === $menu->id) {
+                throw new Exception("No es posible guardar como menú padre al mismo menú");
+            }
+
+            $menu->save();
+            $this->redirect('/menus');
+        } catch (\Throwable $e) {
+            $this->handleErrorView($e, 'menu/edit', [
+                'menu' => $this->menu->findById($id),
+                'menus' => $this->menu->getAllParents(),
+                'data' =>  $data
+            ]);
+        }
     }
 
     /**
@@ -99,8 +131,24 @@ class MenuController implements CrudController
      */
     public function destroy(int $id): void
     {
-        $this->menu->deleteById($id);
-        $this->redirect('/menus');
+        try {
+            $menu = new Menu();
+            $menu->id = $id;
+    
+            if(!empty($menu->getSubsByParent())) {
+                throw new Exception("No es posible eliminar un menú con submenús");
+            }
+    
+            $menu->deleteById();
+            $this->redirect('/menus');
+        } catch (\Throwable $e) {
+            $menus = $this->menu->getAll();
+            $menuNavBar = $this->getMenusNavbar($menus);
+            $this->handleErrorView($e, 'menu/index', [
+                'menus' => $menus,
+                'menuNavBar' => $menuNavBar
+            ]);
+        }
     }
 
     /**
@@ -112,17 +160,21 @@ class MenuController implements CrudController
      */
     public function showByName(string $link): void
     {
-        // Buscar el menú por su link
-        $menu = $this->menu->findByField('navLink', $link);
+        try {
+            // Buscar el menú por su link
+            $menu = $this->menu->findByField('navLink', $link);
+            if(!$menu){
+                throw new Exception("Menú no encontrado");
+            }
+            
+            $menus = $this->menu->getAll();
+            $menuNavBar = $this->getMenusNavbar($menus);
+            $this->view('menu/show', compact('menu', 'menuNavBar'));
 
-        if(!$menu){
-            http_response_code(404);
-            echo "Menu not found";
+        } catch (\Throwable $e) {
+            $this->handleErrorView($e);
         }
         
-        $menus = $this->menu->getAll();
-        $menuNavBar = $this->getMenusNavbar($menus);
-        $this->view('menu/show', compact('menu', 'menuNavBar'));
     }
 
     /**
@@ -133,7 +185,7 @@ class MenuController implements CrudController
      */
     public function getMenusNavBar(array $menus = []): array 
     {
-        if(empty($menus)) return false;
+        if(empty($menus)) return [];
 
         $menuNavBar_aux = array_map(function($m){
             $menu = (Object) [
@@ -159,5 +211,21 @@ class MenuController implements CrudController
         }
 
         return $menuNavBar;
+    }
+
+    /**
+     * Función que valida que se reciba nombre y descripción 
+     *
+     * @param array $data
+     *
+     * @return void
+     */
+    private function validateMenuData(array $data): array {
+        if (empty(trim($data['name'])) || empty(trim($data['description']))) {
+            throw new Exception("El nombre y la descripción son obligatorios.");
+        }
+        $data['name'] = trim($data['name']);
+        $data['description'] = trim($data['description']);
+        return $data;
     }
 }

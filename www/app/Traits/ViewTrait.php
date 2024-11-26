@@ -6,7 +6,7 @@ trait ViewTrait
 {
     
     /**
-     * view - Renderiza una vista.
+     * Renderiza una vista.
      *
      * @param string $view Path de la vista.
      * @param array $data Datos a pasar a la vista.
@@ -28,7 +28,7 @@ trait ViewTrait
 
 
     /**
-     * redirect - Redirecciona a una pagina
+     * Redirecciona a una pagina
      *
      * @param string $url
      *
@@ -38,5 +38,21 @@ trait ViewTrait
     {
         header("Location: $url");
         exit;
+    }
+
+    /**
+     * Funcion que guarda error en archivo de logs y renderiza vista con errores
+     *
+     * @param \Throwable $e
+     * @param string $view
+     * @param array $data
+     *
+     * @return void
+     */
+    public function handleErrorView(\Throwable $e, string $view = 'errors/404', array $data = []){
+        error_log("[ERROR] {$e->getMessage()} in {$e->getFile()} on line {$e->getLine()}\n", 3, __DIR__ . '/../../php_errors.log');
+        $data = array_merge($data, ['error' => $e->getMessage()]);
+        http_response_code(404);
+        $this->view($view, $data);
     }
 }

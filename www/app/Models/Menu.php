@@ -47,9 +47,21 @@ class Menu extends Model {
     public function getAllParents(): array
     {
         $sql = "SELECT m1.id, m1.name
-             FROM menus m1 
-             WHERE m1.parent_id IS NULL
-             ORDER BY m1.id";
+            FROM menus m1 
+            WHERE m1.parent_id IS NULL
+            ORDER BY m1.id";
+        return $this->fetchAllQuery($sql);
+    }
+
+
+    /**
+     * Funcion que consulta los submenus de un menu
+     *
+     * @return array
+     */
+    public function getSubsByParent(): array
+    {
+        $sql = "SELECT * FROM menus WHERE parent_id = {$this->id} ";
         return $this->fetchAllQuery($sql);
     }
 

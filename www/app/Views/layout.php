@@ -50,6 +50,13 @@
         </nav>
     </header>
 
+    <?php if (isset($error)): ?>
+        <div class="alert alert-danger">
+            <?= htmlspecialchars($error) ?>
+        </div>
+    <?php endif; ?>
+
+
     <!-- Contenido -->
     <div class="container mt-5">
         <?= $content ?? '<p>Contenido no disponible.</p>' ?>

@@ -16,6 +16,8 @@ ob_start();
                 <option value="">Seleccione una opción</option>
                 <?php foreach ($menus as $m): ?>
                     <option value="<?= $m['id'] ?>" <?= $menu['parent_id'] === $m['id'] ? 'selected' : '' ?>>
+                        <?= $m['name'] ?>
+                    </option>
                 <?php endforeach; ?>
             </select>
         </div>
