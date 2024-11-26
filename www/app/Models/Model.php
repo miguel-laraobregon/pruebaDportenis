@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Config\Database;
+use Core\Database;
 use InvalidArgumentException;
 use PDO;
 
